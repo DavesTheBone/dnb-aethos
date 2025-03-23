@@ -1,13 +1,17 @@
 package states;
 
 import backend.WeekData;
+import backend.Highscore;
 
 import flixel.input.keyboard.FlxKey;
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
-import haxe.Json;
+import tjson.TJSON as Json;
 
 import openfl.Assets;
 import openfl.display.Bitmap;
@@ -16,7 +20,13 @@ import openfl.display.BitmapData;
 import shaders.ColorSwap;
 
 import states.StoryMenuState;
+import states.OutdatedState;
 import states.MainMenuState;
+
+#if MODS_ALLOWED
+import sys.FileSystem;
+import sys.io.File;
+#end
 
 typedef TitleData =
 {
@@ -126,6 +136,38 @@ class TitleState extends MusicBeatState
 		loadJsonData();
 		#if TITLE_SCREEN_EASTER_EGG easterEggData(); #end
 		Conductor.bpm = musicBPM;
+
+        var bg:FlxSprite = new FlxSprite();
+		bg.antialiasing = ClientPrefs.data.antialiasing;
+
+		if (titleJSON.backgroundSprite != null && titleJSON.backgroundSprite.length > 0 && titleJSON.backgroundSprite != "none"){
+			bg.loadGraphic(Paths.image(titleJSON.backgroundSprite));
+		}else{
+			bg.makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		}
+
+		// bg.setGraphicSize(Std.int(bg.width * 0.6));
+		// bg.updateHitbox();
+		add(bg);
+
+		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0xFF8A5B52, 0x0));
+		grid.velocity.set(40, 40);
+		grid.alpha = 0;
+		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
+		add(grid);
+		
+		animbarScrt = new FlxBackdrop(Paths.image('trueTitleBarTop'), X, 0, 0);
+		animbarScrb = new FlxBackdrop(Paths.image('trueTitleBarBottom'), X, 0, 0);
+		animbarScrt.screenCenter(XY);
+		animbarScrb.screenCenter(XY);
+		new FlxTimer().start(0.005, function(tmr:FlxTimer)
+		{
+			animbarScrb.x -= 2;
+			animbarScrt.x += 2;
+			tmr.reset(0.005);
+		});
+		add(animbarScrt);
+		add(animbarScrb);
 
 		logoBl = new FlxSprite(logoPosition.x, logoPosition.y);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
