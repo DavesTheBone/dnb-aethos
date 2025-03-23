@@ -534,7 +534,7 @@ class TitleState extends MusicBeatState
 				case 5:
 					deleteCoolText();
 				case 6:
-					createCoolText(['fan Made mod', 'of'], -40);
+					createCoolText(['an fan Made', 'of'], -40);
 				case 8:
 					addMoreText('dave & bambi', -40);
 					ngSpr.visible = true;
